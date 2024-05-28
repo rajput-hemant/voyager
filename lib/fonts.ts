@@ -1,4 +1,4 @@
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 
 /* -----------------------------------------------------------------------------------------------
  * Google Fonts
@@ -9,7 +9,7 @@ export const fontSans = Inter({
   subsets: ["latin"],
 });
 
-export const fontMono = JetBrains_Mono({
+export const fontMono = Roboto_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
 });

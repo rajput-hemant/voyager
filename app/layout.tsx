@@ -3,8 +3,10 @@ import "@/app/globals.css";
 import React from "react";
 
 import { Providers } from "@/components/providers";
+import { Adsbar } from "@/components/site-header/ads-bar";
+import { Navbar } from "@/components/site-header/navbar";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { fontSans } from "@/lib/fonts";
+import { fontMono, fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
@@ -18,10 +20,17 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
       <body
         className={cn(
           fontSans.variable,
+          fontMono.variable,
           "min-h-screen scroll-smooth font-sans antialiased"
         )}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex flex-col">
+            <Adsbar />
+            <Navbar />
+            <main className="container flex-1">{children}</main>
+          </div>
+        </Providers>
 
         <TailwindIndicator />
       </body>
