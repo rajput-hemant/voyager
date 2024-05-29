@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { ChevronLeft, ChevronRight, Copy } from "lucide-react";
 
-import type { Transactions } from "@/types/transaction";
+import type { Transactions } from "@/types/transactions";
 
 import { cn, formatTimestamp } from "@/lib/utils";
 

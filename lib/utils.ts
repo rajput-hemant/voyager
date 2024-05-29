@@ -24,3 +24,22 @@ export function formatTimestamp(timestamp: number) {
     return `${daysAgo} day${daysAgo > 1 ? "s" : ""}`;
   }
 }
+
+export function formatTimestampUsingIntl(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false, // Use 24-hour time format
+  });
+
+  // Format the date
+  const formattedDate = formatter.format(date);
+
+  return formattedDate.replace(",", ""); // Remove the comma if present
+}
