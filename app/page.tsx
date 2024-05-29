@@ -13,7 +13,7 @@ type DashboardPageProps = {
 };
 
 export default async function DashboardPage(props: DashboardPageProps) {
-  const { type, p = "1", ps = "25" } = props.searchParams;
+  const { type = "", p = "1", ps = "25" } = props.searchParams;
 
   return (
     <div className="my-12 min-h-[400px] rounded-lg bg-secondary p-8">
@@ -43,15 +43,16 @@ export default async function DashboardPage(props: DashboardPageProps) {
       >
         {[
           { t: "", label: "All" },
-          { t: "0", label: "declare" },
-          { t: "2", label: "deploy" },
-        ].map(({ t, label }) => (
+          { t: "0", label: "deploy" },
+          { t: "2", label: "declare" },
+        ].map(({ t, label }, i, arr) => (
           <li key={label}>
             <Link
               href={`?type=${t}`}
               className={cn(
-                "flex size-full h-full items-center justify-center border-r px-4",
-                t === type && "bg-border"
+                "flex size-full h-full items-center justify-center px-4",
+                t === type && "bg-border",
+                i !== arr.length - 1 && "border-r"
               )}
             >
               {label}

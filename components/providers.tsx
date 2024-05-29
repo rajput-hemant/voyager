@@ -6,6 +6,8 @@ import { ThemeProvider } from "next-themes";
 
 import type { ThemeProviderProps } from "next-themes/dist/types";
 
+import { TooltipProvider } from "./ui/tooltip";
+
 type Props = {
   theme?: ThemeProviderProps;
   children: React.ReactNode;
@@ -20,7 +22,7 @@ export function Providers({ children, theme }: Props) {
       disableTransitionOnChange
       {...theme}
     >
-      {children}
+      <TooltipProvider>{children}</TooltipProvider>
     </ThemeProvider>
   );
 }

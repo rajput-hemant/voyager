@@ -9,10 +9,11 @@ export type Transactions = {
     contract_address: string;
     timestamp: number;
     actual_fee: string;
-    execution_status: string;
+    execution_status: "SUCCEEDED" | "PENDING" | "REVERTED";
     revert_error?: string;
     status: string;
     finality_status: string;
+    operations?: string;
   }[];
   lastPage: number;
 };
