@@ -1,0 +1,7 @@
+services:
+  voyager:
+    build:
+      dockerfile: Dockerfile
+    image: voyager
+    ports:
+      - "3000:3000"
