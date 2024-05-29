@@ -16,24 +16,26 @@ export const metadata = {
 
 export default function RootLayout({ children }: React.PropsWithChildren) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          fontSans.variable,
-          fontMono.variable,
-          "min-h-screen scroll-smooth font-sans antialiased"
-        )}
-      >
-        <Providers>
-          <div className="flex flex-col">
-            <Adsbar />
-            <Navbar />
-            <main className="container flex-1">{children}</main>
-          </div>
-        </Providers>
+    <React.StrictMode>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={cn(
+            fontSans.variable,
+            fontMono.variable,
+            "min-h-screen scroll-smooth font-sans antialiased"
+          )}
+        >
+          <Providers>
+            <div className="flex flex-col">
+              <Adsbar />
+              <Navbar />
+              <main className="container flex-1">{children}</main>
+            </div>
+          </Providers>
 
-        <TailwindIndicator />
-      </body>
-    </html>
+          <TailwindIndicator />
+        </body>
+      </html>
+    </React.StrictMode>
   );
 }
