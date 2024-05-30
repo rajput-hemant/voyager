@@ -7,6 +7,14 @@ import type { Transaction } from "@/types/transaction";
 
 import { AdBanner } from "@/components/ad-banner";
 import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
@@ -314,7 +322,80 @@ export default async function TransactionPage(props: TransactionPageProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="events"></TabsContent>
+          <TabsContent value="events">
+            <Table className="mt-1 overflow-x-auto whitespace-nowrap border-y text-sm">
+              <TableHeader>
+                <TableRow className="grid grid-cols-[minmax(min-content,2fr)_minmax(min-content,1fr)_minmax(min-content,2fr)_minmax(min-content,2fr)_minmax(min-content,2fr)] *:flex *:h-9 *:items-center *:p-1 *:text-xs *:uppercase">
+                  <TableHead>Id</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Block</TableHead>
+                  <TableHead>From</TableHead>
+                  <TableHead>Age</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {txn.receipt.events.map((event) => (
+                  <TableRow
+                    key={event.id}
+                    className="grid grid-cols-[minmax(min-content,2fr)_minmax(min-content,1fr)_minmax(min-content,2fr)_minmax(min-content,2fr)_minmax(min-content,2fr)] *:flex *:h-10 *:w-fit *:items-center *:p-1"
+                  >
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Link
+                            href={`/event/${event.id}`}
+                            className="font-mono text-[rgb(139,163,223)]"
+                          >
+                            {event.id}
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>{event.id}</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="w-fit rounded border border-[rgb(60,80,110)] bg-[rgb(34,54,85)] px-2.5 py-0.5 font-sans text-xs text-[rgb(210,229,255)]">
+                        {event.name}
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Link
+                            href={`/block/${event.blockNumber}`}
+                            className="flex items-center gap-1 font-mono text-[rgb(139,163,223)]"
+                          >
+                            {event.blockNumber} <Copy className="size-3" />
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>{event.blockNumber}</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Link
+                            href={`/contract/${event.fromAddress}`}
+                            className="font-mono text-[rgb(139,163,223)]"
+                          >
+                            {event.contractAlias}
+                          </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>{event.fromAddress}</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+
+                    <TableCell>
+                      {formatTimestamp(event.timestamp)} ago
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
