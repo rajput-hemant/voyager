@@ -1,4 +1,4 @@
-import { txnsRouter } from "./routers/txns";
+import { txnRouter, txnsRouter } from "./routers";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 /**
@@ -8,6 +8,7 @@ import { createCallerFactory, createTRPCRouter } from "./trpc";
  */
 export const appRouter = createTRPCRouter({
   txns: txnsRouter,
+  txn: txnRouter,
 });
 
 // export type definition of API

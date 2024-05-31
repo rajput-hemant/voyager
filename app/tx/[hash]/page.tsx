@@ -1,11 +1,10 @@
 import React from "react";
 import Link from "next/link";
 
-import { Check, CircleHelp, Copy, LoaderCircle } from "lucide-react";
-
-import type { Transaction } from "@/types/transaction";
+import { Check, CircleHelp, LoaderCircle } from "lucide-react";
 
 import { AdBanner } from "@/components/ad-banner";
+import { CopyButton } from "@/components/copy-btn";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -21,6 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { api } from "@/lib/trpc/server";
 import { cn, formatTimestamp, formatTimestampUsingIntl } from "@/lib/utils";
 
 type TransactionPageProps = {
@@ -30,16 +30,8 @@ type TransactionPageProps = {
   };
 };
 
-async function fetcher(hash: string) {
-  const url = new URL(`https://voyager.online/api/txn/${hash}`);
-
-  const response = await fetch(url.toString());
-  const data = await response.json();
-  return data as Transaction;
-}
-
 export default async function TransactionPage(props: TransactionPageProps) {
-  const txn = await fetcher(props.params.hash);
+  const txn = await api.txn.getTransaction(props.params.hash);
 
   return (
     <div className="my-12 min-h-[400px] rounded-lg bg-secondary p-8">
@@ -58,7 +50,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
           </h6>
           <div className="flex items-center gap-2">
             <p className="text-base font-medium leading-8">{txn.header.hash}</p>
-            <Copy className="size-5 text-secondary-foreground" />
+            <CopyButton text={txn.header.hash} />
           </div>
         </div>
 
@@ -199,11 +191,9 @@ export default async function TransactionPage(props: TransactionPageProps) {
                           {fee.symbol}
                         </Link>
                       </TooltipTrigger>
-                      <TooltipContent align="start">
-                        {txn.header.hash}
-                      </TooltipContent>
+                      <TooltipContent align="start">{fee.from}</TooltipContent>
                     </Tooltip>
-                    <Copy className="size-3 text-secondary-foreground" />
+                    <CopyButton text={txn.header.hash} />
                     <span>(${fee.usd})</span>
                     <span>
                       to:{" "}
@@ -221,7 +211,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
                         </TooltipContent>
                       </Tooltip>
                     </span>
-                    <Copy className="size-3 text-secondary-foreground" />
+                    <CopyButton text={fee.to} />
                   </div>
                 ))}
               </Cell>
@@ -244,7 +234,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
                     {txn.header.sender_address}
                   </TooltipContent>
                 </Tooltip>
-                <Copy className="size-3 text-secondary-foreground" />
+                <CopyButton text={txn.header.sender_address} />
               </Cell>
             </div>
 
@@ -253,7 +243,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
             <div className="flex flex-col">
               <Cell title="Unix Timestamp:">
                 {txn.header.timestamp}{" "}
-                <Copy className="size-3 text-secondary-foreground" />
+                <CopyButton text={txn.header.timestamp} />
               </Cell>
 
               <Cell title="Nonce:">{txn.nonce || "-"}</Cell>
@@ -276,7 +266,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
                     {txn.header.hash}
                   </TooltipContent>
                 </Tooltip>
-                <Copy className="size-3 text-secondary-foreground" />
+                <CopyButton text={txn.header.hash} />
               </Cell>
 
               <Cell title="Execution Resources:">
@@ -314,7 +304,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
                       <pre className="font-mono font-medium text-[#cc8f30]">
                         <code>{sig}</code>
                       </pre>
-                      <Copy className="size-3 text-secondary-foreground" />
+                      <CopyButton text={sig} />
                     </div>
                   ))}
                 </div>
@@ -367,7 +357,8 @@ export default async function TransactionPage(props: TransactionPageProps) {
                             href={`/block/${event.blockNumber}`}
                             className="flex items-center gap-1 font-mono text-[rgb(139,163,223)]"
                           >
-                            {event.blockNumber} <Copy className="size-3" />
+                            {event.blockNumber}{" "}
+                            <CopyButton text={event.blockNumber} />
                           </Link>
                         </TooltipTrigger>
                         <TooltipContent>{event.blockNumber}</TooltipContent>

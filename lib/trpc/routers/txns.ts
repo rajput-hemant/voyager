@@ -12,6 +12,15 @@ export const latestBlockReqSchema = z.object({
   result: z.number(),
 });
 
+export const transactionType = z.enum([
+  "ALL",
+  "DECLARE",
+  "DEPLOY",
+  "DEPLOY_ACCOUNT",
+  "INVOKE",
+  "L1_HANDLER",
+]);
+
 export const transactionsReqSchema = z.object({
   result: z.object({
     status: z.string(),
@@ -21,7 +30,7 @@ export const transactionsReqSchema = z.object({
     transactions: z.array(
       z.object({
         transaction_hash: z.string(),
-        type: z.string(),
+        type: transactionType,
         sender_address: z.string().optional(),
       })
     ),
@@ -33,7 +42,8 @@ export const transactionsResSchema = z.object({
     z.object({
       blockNumber: z.number(),
       hash: z.string(),
-      type: z.string(),
+      index: z.number(),
+      type: transactionType,
       contract_address: z.string(),
       timestamp: z.number(),
       status: z.string(),
@@ -46,17 +56,7 @@ export const transactionsResSchema = z.object({
 
 const txnsInputSchema = z
   .object({
-    type: z
-      .enum([
-        "ALL",
-        "DECLARE",
-        "DEPLOY",
-        "DEPLOY_ACCOUNT",
-        "INVOKE",
-        "L1_HANDLER",
-      ])
-      .optional()
-      .default("ALL"),
+    type: transactionType.optional().default("ALL"),
     ps: z
       .union([z.number(), z.string()])
       .transform((v) => +v)
@@ -99,19 +99,23 @@ export const txnsRouter = createTRPCRouter({
         (tx) => tx.type === type || type === "ALL"
       );
 
-      return transactionsResSchema.parse({
+      const payload = transactionsResSchema.parse({
         items: filteredTransactions
-          .map((tx) => ({
-            blockNumber: result.block_number,
-            hash: tx.transaction_hash,
-            type: tx.type,
-            contract_address: tx.sender_address || "",
-            timestamp: result.timestamp,
-            status: result.status,
-            finality_status: result.status,
-            // TODO: replace with actual operations
-            operations: null,
-          }))
+          .map(
+            (tx, i) =>
+              ({
+                blockNumber: result.block_number,
+                hash: tx.transaction_hash,
+                index: i,
+                type: tx.type,
+                contract_address: tx.sender_address || "",
+                timestamp: result.timestamp,
+                status: result.status,
+                finality_status: result.status,
+                // TODO: replace with actual operations
+                operations: null,
+              }) satisfies Transactions["items"][number]
+          )
           .slice(cursor ? cursor * ps : 0, (cursor ? cursor + 1 : 1) * ps),
         nextCursor: cursor
           ? filteredTransactions.length > cursor * ps
@@ -119,6 +123,8 @@ export const txnsRouter = createTRPCRouter({
             : null
           : 1,
       } satisfies Transactions);
+
+      return payload;
     }),
 });
 
@@ -205,4 +211,4 @@ export const txnsRouter = createTRPCRouter({
  * -----------------------------------------------------------------------------------------------*/
 
 export type Transactions = z.infer<typeof transactionsResSchema>;
-export type TransactionType = z.infer<typeof txnsInputSchema>["type"];
+export type TransactionType = z.infer<typeof transactionType>;

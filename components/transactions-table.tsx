@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 
-import { Copy, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import type { Transactions, TransactionType } from "@/lib/trpc/routers/txns";
 
@@ -11,6 +11,7 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { api } from "@/lib/trpc/react";
 import { cn, formatTimestamp } from "@/lib/utils";
 
+import { CopyButton } from "./copy-btn";
 import { TxnStatus } from "./icons";
 import {
   Table,
@@ -38,6 +39,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         initialData: { pages: [initialTxns], pageParams: [null] },
         initialCursor: 1,
+        refetchInterval: 10000,
       }
     );
 
@@ -77,13 +79,13 @@ export function TransactionsTable(props: TransactionsTableProps) {
                 <TableCell>
                   <Tooltip>
                     <TooltipTrigger>
-                      <TxnStatus className="" />
+                      <TxnStatus />
                     </TooltipTrigger>
                     <TooltipContent>{tx.status}</TooltipContent>
                   </Tooltip>
                 </TableCell>
                 {/* hash */}
-                <TableCell>
+                <TableCell className="flex items-center gap-2">
                   <Tooltip>
                     <TooltipTrigger>
                       <Link
@@ -93,11 +95,11 @@ export function TransactionsTable(props: TransactionsTableProps) {
                         {tx.hash.slice(0, 6)}
                         <span className="-mx-2 font-sans">...</span>
                         {tx.hash.slice(-4)}
-                        <Copy className="size-3.5 text-muted-foreground" />
                       </Link>
                     </TooltipTrigger>
                     <TooltipContent>{tx.hash}</TooltipContent>
                   </Tooltip>
+                  <CopyButton text={tx.hash} />
                 </TableCell>
                 {/* type */}
                 <TableCell>
@@ -109,7 +111,11 @@ export function TransactionsTable(props: TransactionsTableProps) {
                       tx.type === "DEPLOY" &&
                         "border-[rgb(107,125,7)] bg-[rgb(32,46,38)] text-[rgb(254,255,181)]",
                       tx.type === "DECLARE" &&
-                        "border-[rgb(60,80,110)] bg-[rgb(34,54,85)] text-[rgb(210,229,255)]"
+                        "border-[rgb(60,80,110)] bg-[rgb(34,54,85)] text-[rgb(210,229,255)]",
+                      tx.type === "DEPLOY_ACCOUNT" &&
+                        "border-[rgb(88,63,42)] bg-[rgb(59,42,28)] text-[rgb(255,200,153)]",
+                      tx.type === "L1_HANDLER" &&
+                        "border-[rgb(76,46,46)] bg-[rgb(46,28,28)] text-[rgb(255,153,153)]"
                     )}
                   >
                     {tx.type}
@@ -154,8 +160,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
                       //   "border-[rgb(76,46,46)] bg-[rgb(46,28,28)] text-[rgb(255,153,153)]"
                     )}
                   >
-                    {tx.blockNumber}{" "}
-                    <Copy className="size-3.5 text-muted-foreground" />
+                    {tx.blockNumber} <CopyButton text={tx.blockNumber} />
                   </div>
                 </TableCell>
                 {/* age */}
