@@ -1,19 +1,32 @@
 import Link from "next/link";
 
+import type { TransactionType } from "@/lib/trpc/routers/txns";
+
 import { AdBanner } from "@/components/ad-banner";
 import { TransactionsTable } from "@/components/transactions-table";
+import { api } from "@/lib/trpc/server";
 import { cn } from "@/lib/utils";
 
 type DashboardPageProps = {
   searchParams: {
-    type: "0" | "2";
-    p: string;
+    type: TransactionType;
     ps: string;
   };
 };
 
 export default async function DashboardPage(props: DashboardPageProps) {
-  const { type = "", p = "1", ps = "25" } = props.searchParams;
+  const { type, ps = "25" } = props.searchParams;
+
+  const transactions = await api.txns.getTransactions({ type, ps });
+
+  const tabs: { t: TransactionType; label: string }[] = [
+    { t: "ALL", label: "All" },
+    { t: "DECLARE", label: "Declare" },
+    { t: "DEPLOY", label: "Deploy" },
+    { t: "DEPLOY_ACCOUNT", label: "Deploy Account" },
+    { t: "INVOKE", label: "Invoke" },
+    { t: "L1_HANDLER", label: "L1 Handler" },
+  ];
 
   return (
     <div className="my-12 min-h-[400px] rounded-lg bg-secondary p-8">
@@ -32,17 +45,13 @@ export default async function DashboardPage(props: DashboardPageProps) {
         role="group"
         className="mb-6 box-content flex h-8 w-fit items-center justify-center border text-sm *:flex *:h-full *:items-center *:justify-center"
       >
-        {[
-          { t: "", label: "All" },
-          { t: "0", label: "deploy" },
-          { t: "2", label: "declare" },
-        ].map(({ t, label }, i, arr) => (
+        {tabs.map(({ t, label }, i, arr) => (
           <li key={label}>
             <Link
               href={`?type=${t}`}
               className={cn(
                 "flex size-full h-full items-center justify-center px-4",
-                t === type && "bg-border",
+                (t === type || (t === "ALL" && !type)) && "bg-border",
                 i !== arr.length - 1 && "border-r"
               )}
             >
@@ -52,7 +61,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
         ))}
       </ul>
 
-      <TransactionsTable type={type} p={+p} ps={+ps} />
+      <TransactionsTable initialTxns={transactions} type={type} ps={ps} />
     </div>
   );
 }

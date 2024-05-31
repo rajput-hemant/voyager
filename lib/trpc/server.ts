@@ -3,9 +3,8 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 
-import { createTRPCContext } from "@/lib/trpc/trpc";
-
 import { createCaller } from "./root";
+import { createTRPCContext } from "./trpc";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when

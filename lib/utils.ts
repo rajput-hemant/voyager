@@ -43,3 +43,24 @@ export function formatTimestampUsingIntl(timestamp: number) {
 
   return formattedDate.replace(",", ""); // Remove the comma if present
 }
+
+export async function queryStrk(
+  method: string,
+  params: (string | number | object)[] = []
+) {
+  try {
+    const response = await fetch(
+      "https://free-rpc.nethermind.io/mainnet-juno",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      }
+    );
+
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+}
