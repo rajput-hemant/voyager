@@ -1,9 +1,15 @@
 import { ArrowUpRight } from "lucide-react";
 
+import { env } from "@/lib/env";
+
 import { AdsIcon1, AdsIcon2 } from "../icons";
 import { Separator } from "../ui/separator";
 
 export function Adsbar() {
+  if (env.NODE_ENV === "development") {
+    return null;
+  }
+
   return (
     <div className="flex h-12 items-center justify-center">
       <div className="container items-center justify-between px-1 py-3.5">

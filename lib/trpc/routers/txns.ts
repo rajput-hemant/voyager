@@ -1,16 +1,14 @@
 import { z } from "zod";
 
-import { queryStrk } from "@/lib/utils";
+import { db } from "@/lib/db";
+import { transactionsSchema } from "@/lib/db/schema";
 
+import { createCaller } from "../root";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 /* -----------------------------------------------------------------------------------------------
  * Schemas
  * -----------------------------------------------------------------------------------------------*/
-
-export const latestBlockReqSchema = z.object({
-  result: z.number(),
-});
 
 export const transactionType = z.enum([
   "ALL",
@@ -31,26 +29,15 @@ export const transactionsReqSchema = z.object({
       z.object({
         transaction_hash: z.string(),
         type: transactionType,
-        sender_address: z.string().optional(),
+        sender_address: z.string().nullish(),
+        contract_address: z.string().nullish(),
       })
     ),
   }),
 });
 
 export const transactionsResSchema = z.object({
-  items: z.array(
-    z.object({
-      blockNumber: z.number(),
-      hash: z.string(),
-      index: z.number(),
-      type: transactionType,
-      contract_address: z.string(),
-      timestamp: z.number(),
-      status: z.string(),
-      finality_status: z.string(),
-      operations: z.string().nullable(),
-    })
-  ),
+  items: z.array(transactionsSchema),
   nextCursor: z.number().nullable(),
 });
 
@@ -74,137 +61,24 @@ const txnsInputSchema = z
 export const txnsRouter = createTRPCRouter({
   getTransactions: publicProcedure
     .input(txnsInputSchema)
-    .query(async ({ input: { type, ps, cursor } }) => {
-      /* -----------------------------------------------------------------------------------------------
-       * Get the latest block
-       * -----------------------------------------------------------------------------------------------*/
+    .query(async ({ input: { type, ps, cursor }, ctx: { headers } }) => {
+      // seed db
+      const caller = createCaller({ headers });
+      caller.seed.seedDB();
 
-      const { result: latestBlock } = latestBlockReqSchema.parse(
-        await queryStrk("starknet_blockNumber")
-      );
+      const transactions = await db.query.transactions.findMany({
+        where: (tx, { eq }) => (type === "ALL" ? undefined : eq(tx.type, type)),
+        limit: ps,
+        offset: cursor ? cursor * ps : 0,
+        orderBy: ({ blockNumber }, { desc }) => desc(blockNumber),
+      });
 
-      /* -----------------------------------------------------------------------------------------------
-       * Get the transactions
-       * -----------------------------------------------------------------------------------------------*/
-
-      const block_number = latestBlock - 10;
-
-      const data = await queryStrk("starknet_getBlockWithTxs", [
-        { block_number },
-      ]);
-
-      const { result } = transactionsReqSchema.parse(data);
-
-      const filteredTransactions = result.transactions.filter(
-        (tx) => tx.type === type || type === "ALL"
-      );
-
-      const payload = transactionsResSchema.parse({
-        items: filteredTransactions
-          .map(
-            (tx, i) =>
-              ({
-                blockNumber: result.block_number,
-                hash: tx.transaction_hash,
-                index: i,
-                type: tx.type,
-                contract_address: tx.sender_address || "",
-                timestamp: result.timestamp,
-                status: result.status,
-                finality_status: result.status,
-                // TODO: replace with actual operations
-                operations: null,
-              }) satisfies Transactions["items"][number]
-          )
-          .slice(cursor ? cursor * ps : 0, (cursor ? cursor + 1 : 1) * ps),
-        nextCursor: cursor
-          ? filteredTransactions.length > cursor * ps
-            ? cursor + 1
-            : null
-          : 1,
-      } satisfies Transactions);
-
-      return payload;
+      return transactionsResSchema.parse({
+        items: transactions,
+        nextCursor: cursor ? cursor + 1 : 1,
+      });
     }),
 });
-
-// export const txnsRouter = createTRPCRouter({
-//   getTransactions: publicProcedure
-//     .input(txnsInputSchema)
-//     .query(async ({ input: { type, ps, cursor } }) => {
-//       /* -----------------------------------------------------------------------------------------------
-//        * init variables
-//        * -----------------------------------------------------------------------------------------------*/
-//       const transactions = [];
-//       const currentPage = cursor || 1;
-//       const itemsPerPage = ps;
-
-//       /* -----------------------------------------------------------------------------------------------
-//        * helper fn to fetch and parse block txns
-//        * -----------------------------------------------------------------------------------------------*/
-//       const fetchTransactions = async (block_number: number) => {
-//         const data = await queryStrk("starknet_getBlockWithTxs", [
-//           { block_number },
-//         ]);
-//         const { result } = transactionsReqSchema.parse(data);
-
-//         return result.transactions.map(
-//           (tx) =>
-//             ({
-//               blockNumber: result.block_number,
-//               hash: tx.transaction_hash,
-//               type: tx.type,
-//               contract_address: tx.sender_address || "",
-//               timestamp: result.timestamp,
-//               status: result.status,
-//               finality_status: result.status,
-//               // TODO: replace with actual operations
-//               operations: null,
-//             }) satisfies Transactions["items"][0]
-//         );
-//       };
-
-//       /* -----------------------------------------------------------------------------------------------
-//        * fetch txns until we've enough for the current page
-//        * -----------------------------------------------------------------------------------------------*/
-//       const { result: latestBlockNumber } = latestBlockReqSchema.parse(
-//         await queryStrk("starknet_blockNumber")
-//       );
-//       let blockNumber = latestBlockNumber;
-
-//       while (transactions.length < itemsPerPage * currentPage) {
-//         const blockTransactions = await fetchTransactions(blockNumber);
-
-//         const filteredTransactions = blockTransactions.filter(
-//           (tx) => tx.type === type || type === "ALL"
-//         );
-//         transactions.push(...filteredTransactions);
-//         blockNumber--;
-
-//         // Stop if we reach block zero or there are no more transactions to fetch
-//         if (blockNumber < 0 || blockTransactions.length === 0) {
-//           break;
-//         }
-//       }
-
-//       /* -----------------------------------------------------------------------------------------------
-//        * paginate the txns
-//        * -----------------------------------------------------------------------------------------------*/
-//       const paginatedTransactions = transactions.slice(
-//         (currentPage - 1) * itemsPerPage,
-//         currentPage * itemsPerPage
-//       );
-
-//       return transactionsResSchema.parse({
-//         items: paginatedTransactions,
-//         nextCursor: cursor
-//           ? transactions.length > cursor * ps
-//             ? cursor + 1
-//             : null
-//           : 1,
-//       } satisfies Transactions);
-//     }),
-// });
 
 /* -----------------------------------------------------------------------------------------------
  * Types

@@ -48,16 +48,17 @@ export async function queryStrk(
   method: string,
   params: (string | number | object)[] = []
 ) {
+  let response;
   try {
-    const response = await fetch(
-      "https://free-rpc.nethermind.io/mainnet-juno",
-      {
+    if (method === "starknet_getTransactionReceipt") {
+      response = await fetch(`https://voyager.online/api/txn/${params[0]}`);
+    } else {
+      response = await fetch("https://free-rpc.nethermind.io/mainnet-juno", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-      }
-    );
-
+      });
+    }
     return await response.json();
   } catch (error) {
     console.error(error);

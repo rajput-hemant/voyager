@@ -96,7 +96,7 @@ export default async function DashboardPage(props: DashboardPageProps) {
       </div>
 
       <TransactionsTable
-        key={transactions.items[0].blockNumber}
+        key={transactions.items.at(0)?.blockNumber}
         initialTxns={transactions}
         type={type}
         ps={ps}

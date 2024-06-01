@@ -1,4 +1,5 @@
 import { txnRouter, txnsRouter } from "./routers";
+import { seedRouter } from "./routers/seed";
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 
 /**
@@ -9,6 +10,7 @@ import { createCallerFactory, createTRPCRouter } from "./trpc";
 export const appRouter = createTRPCRouter({
   txns: txnsRouter,
   txn: txnRouter,
+  seed: seedRouter,
 });
 
 // export type definition of API

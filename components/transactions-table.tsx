@@ -39,13 +39,14 @@ export function TransactionsTable(props: TransactionsTableProps) {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         initialData: { pages: [initialTxns], pageParams: [null] },
         initialCursor: 1,
-        refetchInterval: 10000,
       }
     );
 
   const { isIntersecting, ref } = useIntersectionObserver({
     threshold: 0.5,
   });
+
+  const transactions = data?.pages.flatMap((page) => page.items);
 
   React.useEffect(() => {
     if (isIntersecting) {
@@ -68,9 +69,8 @@ export function TransactionsTable(props: TransactionsTableProps) {
         </TableHeader>
 
         <TableBody>
-          {data?.pages
-            .flatMap((page) => page.items)
-            .map((tx) => (
+          {transactions && transactions.length ? (
+            transactions.map((tx) => (
               <TableRow
                 key={tx.hash}
                 className="grid grid-cols-[minmax(min-content,1fr)_minmax(min-content,3fr)_minmax(min-content,2fr)_minmax(min-content,5fr)_minmax(min-content,2fr)_minmax(min-content,2fr)] *:flex *:h-10 *:w-fit *:items-center *:p-1"
@@ -123,17 +123,21 @@ export function TransactionsTable(props: TransactionsTableProps) {
                 </TableCell>
                 {/* operations */}
                 <TableCell className="gap-2 font-mono text-[rgb(139,163,223)]">
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Link href={`/contract/$${tx.contract_address}`}>
-                        {tx.contract_address.slice(0, 6)}
-                        <span className="font-sans">...</span>
-                        {tx.contract_address.slice(-4)}{" "}
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>{tx.contract_address}</TooltipContent>
-                  </Tooltip>
-                  <div className="space-x-2">
+                  {tx.contractAddress ? (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Link href={`/contract/$${tx.contractAddress}`}>
+                          {tx.contractAddress.slice(0, 6)}
+                          <span className="font-sans">...</span>
+                          {tx.contractAddress.slice(-4)}{" "}
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>{tx.contractAddress}</TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    "-"
+                  )}
+                  {/* <div className="space-x-2">
                     {tx.operations?.split(",").map((op, i) =>
                       i > 2 ? null : (
                         <span
@@ -144,7 +148,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
                         </span>
                       )
                     )}
-                  </div>
+                  </div> */}
                 </TableCell>
                 {/* block */}
                 <TableCell>
@@ -176,7 +180,14 @@ export function TransactionsTable(props: TransactionsTableProps) {
                   </Tooltip>
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+          ) : (
+            <div className="flex h-40 w-full items-center justify-center">
+              <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
+                <em>No transactions found</em> 😔
+              </h3>
+            </div>
+          )}
         </TableBody>
       </Table>
 
