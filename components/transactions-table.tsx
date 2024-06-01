@@ -68,7 +68,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
         </TableHeader>
 
         <TableBody>
-          {transactions && transactions.length ? (
+          {transactions && transactions.length ?
             transactions.map((tx) => (
               <TableRow
                 key={tx.hash}
@@ -122,7 +122,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
                 </TableCell>
                 {/* operations */}
                 <TableCell className="gap-2 font-mono text-[rgb(139,163,223)]">
-                  {tx.contractAddress ? (
+                  {tx.contractAddress ?
                     <Tooltip>
                       <TooltipTrigger>
                         <Link href={`/contract/$${tx.contractAddress}`}>
@@ -133,9 +133,7 @@ export function TransactionsTable(props: TransactionsTableProps) {
                       </TooltipTrigger>
                       <TooltipContent>{tx.contractAddress}</TooltipContent>
                     </Tooltip>
-                  ) : (
-                    "-"
-                  )}
+                  : "-"}
                   {/* <div className="space-x-2">
                     {tx.operations?.split(",").map((op, i) =>
                       i > 2 ? null : (
@@ -180,31 +178,29 @@ export function TransactionsTable(props: TransactionsTableProps) {
                 </TableCell>
               </TableRow>
             ))
-          ) : (
-            <TableRow className="flex h-40 w-full items-center justify-center">
+          : <TableRow className="flex h-40 w-full items-center justify-center">
               <TableCell>
                 <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
                   <em>No transactions found</em> 😔
                 </h3>
               </TableCell>
             </TableRow>
-          )}
+          }
         </TableBody>
       </Table>
 
-      {hasNextPage ? (
+      {hasNextPage ?
         <div ref={ref} className="flex items-center justify-center pt-6">
           {isFetchingNextPage && (
             <Loader2 className="size-10 animate-spin text-border" />
           )}
         </div>
-      ) : (
-        !!transactions?.length && (
+      : !!transactions?.length && (
           <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
             <em>Yay! You have seen it all</em> 🤩
           </h3>
         )
-      )}
+      }
     </div>
   );
 }

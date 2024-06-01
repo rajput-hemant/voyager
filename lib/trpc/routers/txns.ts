@@ -75,9 +75,10 @@ export const txnsRouter = createTRPCRouter({
 
       return transactionsResSchema.parse({
         items: transactions,
-        nextCursor: cursor
-          ? transactions.length > ps
-            ? cursor + 1
+        nextCursor:
+          cursor ?
+            transactions.length > ps ?
+              cursor + 1
             : undefined
           : 1,
       });

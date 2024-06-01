@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["bom1"],
+  "headers": [
+    {
+      "source": "(.*)",
+      "headers": [
+        { "key": "Author", "value": "rajput-hemant@github" },
+        { "key": "Github", "value": "https://github.com/rajput-hemant" }
+      ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/trpc/seed.seedDB",
+      "schedule": "* * * * *"
+    }
+  ]
+}
