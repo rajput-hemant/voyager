@@ -53,15 +53,23 @@ export async function queryStrk(
     if (method === "starknet_getTransactionReceipt") {
       response = await fetch(`https://voyager.online/api/txn/${params[0]}`);
     } else {
-      response = await fetch("https://free-rpc.nethermind.io/mainnet-juno", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-      });
+      response = await fetch(
+        "https://free-rpc.nethermind.io/mainnet-juno",
+        // "https://docs-demo.strk-mainnet.quiknode.pro",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+        }
+      );
     }
     return await response.json();
   } catch (error) {
     console.error(error);
     return null;
   }
+}
+
+export function truncateAddress(address: string, start = 6, end = 4) {
+  return `${address.slice(0, start)}...${address.slice(-end)}`;
 }

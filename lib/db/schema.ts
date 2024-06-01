@@ -86,7 +86,6 @@ export const transaction = createTable(
         };
         ec_op_builtin_applications: number;
         pedersen_builtin_applications: number;
-        poseidon_builtin_applications: number;
         range_check_builtin_applications: number;
       }>()
       .notNull(),

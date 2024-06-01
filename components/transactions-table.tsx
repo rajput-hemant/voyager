@@ -9,7 +9,7 @@ import type { Transactions, TransactionType } from "@/lib/trpc/routers/txns";
 
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { api } from "@/lib/trpc/react";
-import { cn, formatTimestamp } from "@/lib/utils";
+import { cn, formatTimestamp, truncateAddress } from "@/lib/utils";
 
 import { CopyButton } from "./copy-btn";
 import { TxnStatus } from "./icons";
@@ -86,15 +86,20 @@ export function TransactionsTable(props: TransactionsTableProps) {
                 {/* hash */}
                 <TableCell className="flex items-center gap-2">
                   <Tooltip>
-                    <TooltipTrigger>
-                      <Link
-                        href={`/tx/${tx.hash}`}
-                        className="inline-flex items-center justify-between gap-2 font-mono text-[rgb(139,163,223)]"
-                      >
-                        {tx.hash.slice(0, 6)}
-                        <span className="-mx-2 font-sans">...</span>
-                        {tx.hash.slice(-4)}
-                      </Link>
+                    <TooltipTrigger className="text-[rgb(139,163,223)]">
+                      {(
+                        tx.type === "INVOKE" &&
+                        tx.status.toLowerCase().includes("accepted")
+                      ) ?
+                        <Link
+                          href={`/tx/${tx.hash}`}
+                          className="inline-flex items-center justify-between gap-2 font-mono"
+                        >
+                          {tx.hash.slice(0, 6)}
+                          <span className="-mx-2 font-sans">...</span>
+                          {tx.hash.slice(-4)}
+                        </Link>
+                      : <span>{truncateAddress(tx.hash)}</span>}
                     </TooltipTrigger>
                     <TooltipContent>{tx.hash}</TooltipContent>
                   </Tooltip>

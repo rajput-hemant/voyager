@@ -68,7 +68,6 @@ export const transactionReqSchema = z.object({
     }),
     ec_op_builtin_applications: z.number(),
     pedersen_builtin_applications: z.number(),
-    poseidon_builtin_applications: z.number(),
     range_check_builtin_applications: z.number(),
   }),
 });
