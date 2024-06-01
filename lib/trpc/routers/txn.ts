@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { db } from "@/lib/db";
+import { transaction } from "@/lib/db/schema";
 import { queryStrk } from "@/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
@@ -8,26 +10,26 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
  * Schemas
  * -----------------------------------------------------------------------------------------------*/
 
-export const transactionSchema = z.object({
+export const transactionReqSchema = z.object({
   header: z.object({
     blockId: z.string(),
     blockNumber: z.number(),
     hash: z.string(),
     index: z.number(),
-    l1VerificationHash: z.string().nullable(),
+    // l1VerificationHash: z.string().nullable(),
     type: z.string(),
     contract_address: z.string(),
-    sender_address: z.string(),
+    // sender_address: z.string(),
     timestamp: z.number(),
     signature: z.array(z.string()),
     execution_status: z.string(),
     status: z.string(),
-    finality_status: z.string(),
+    // finality_status: z.string(),
   }),
   maxFee: z.string().nullable(),
   usdFormattedMaxFee: z.string().nullable(),
-  actualFee: z.string(),
-  actualFeeUnit: z.string(),
+  // actualFee: z.string(),
+  // actualFeeUnit: z.string(),
   gasConsumed: z.string(),
   nonce: z.string().nullable(),
   version: z.string(),
@@ -40,8 +42,6 @@ export const transactionSchema = z.object({
         timestamp: z.number(),
         selector: z.string(),
         name: z.string(),
-        nestedName: z.string(),
-        nestedEventNames: z.array(z.unknown()),
         id: z.string(),
         contractAlias: z.string().nullable(),
       })
@@ -73,17 +73,31 @@ export const transactionSchema = z.object({
   }),
 });
 
+export const transactionResSchema = z.intersection(
+  transactionReqSchema.shape.header.omit({ hash: true }),
+  z.object({ hash: z.string() })
+);
+
 /* -----------------------------------------------------------------------------------------------
  * Router
  * -----------------------------------------------------------------------------------------------*/
 
 export const txnRouter = createTRPCRouter({
   getTransaction: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const data = await queryStrk("starknet_getTransactionReceipt", [input]);
+    let txn = await db.query.transaction.findFirst({
+      where: ({ id }, { eq }) => eq(id, input),
+    });
 
-    const result = transactionSchema.parse(data);
+    if (!txn) {
+      const data = await queryStrk("starknet_getTransactionReceipt", [input]);
+      const result = transactionReqSchema.parse(data);
+      [txn] = await db
+        .insert(transaction)
+        .values({ id: input, ...result })
+        .returning();
+    }
 
-    return result;
+    return txn;
   }),
 });
 
@@ -91,4 +105,4 @@ export const txnRouter = createTRPCRouter({
  * Types
  * -----------------------------------------------------------------------------------------------*/
 
-export type Transaction = z.infer<typeof transactionSchema>;
+export type Transaction = z.infer<typeof transactionResSchema>;

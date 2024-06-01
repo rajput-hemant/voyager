@@ -38,7 +38,7 @@ export const transactionsReqSchema = z.object({
 
 export const transactionsResSchema = z.object({
   items: z.array(transactionsSchema),
-  nextCursor: z.number().nullable(),
+  nextCursor: z.number().nullish(),
 });
 
 const txnsInputSchema = z
@@ -68,14 +68,18 @@ export const txnsRouter = createTRPCRouter({
 
       const transactions = await db.query.transactions.findMany({
         where: (tx, { eq }) => (type === "ALL" ? undefined : eq(tx.type, type)),
-        limit: ps,
+        limit: ps + 1,
         offset: cursor ? cursor * ps : 0,
         orderBy: ({ blockNumber }, { desc }) => desc(blockNumber),
       });
 
       return transactionsResSchema.parse({
         items: transactions,
-        nextCursor: cursor ? cursor + 1 : 1,
+        nextCursor: cursor
+          ? transactions.length > ps
+            ? cursor + 1
+            : undefined
+          : 1,
       });
     }),
 });

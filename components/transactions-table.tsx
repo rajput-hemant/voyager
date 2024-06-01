@@ -38,7 +38,6 @@ export function TransactionsTable(props: TransactionsTableProps) {
       {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         initialData: { pages: [initialTxns], pageParams: [null] },
-        initialCursor: 1,
       }
     );
 
@@ -182,11 +181,13 @@ export function TransactionsTable(props: TransactionsTableProps) {
               </TableRow>
             ))
           ) : (
-            <div className="flex h-40 w-full items-center justify-center">
-              <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
-                <em>No transactions found</em> 😔
-              </h3>
-            </div>
+            <TableRow className="flex h-40 w-full items-center justify-center">
+              <TableCell>
+                <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
+                  <em>No transactions found</em> 😔
+                </h3>
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>
@@ -198,9 +199,11 @@ export function TransactionsTable(props: TransactionsTableProps) {
           )}
         </div>
       ) : (
-        <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
-          <em>Yay! You have seen it all</em> 🤩
-        </h3>
+        !!transactions?.length && (
+          <h3 className="py-6 text-center font-mono text-xl sm:text-2xl md:text-3xl">
+            <em>Yay! You have seen it all</em> 🤩
+          </h3>
+        )
       )}
     </div>
   );

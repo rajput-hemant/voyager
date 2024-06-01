@@ -224,17 +224,17 @@ export default async function TransactionPage(props: TransactionPageProps) {
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger>
                     <Link
-                      href={`/contract/${txn.header.sender_address}`}
+                      href={`/contract/${txn.header.contract_address}`}
                       className="text-[rgb(139,163,223)]"
                     >
-                      {txn.header.sender_address}
+                      {txn.header.contract_address}
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent align="start">
-                    {txn.header.sender_address}
+                    {txn.header.contract_address}
                   </TooltipContent>
                 </Tooltip>
-                <CopyButton text={txn.header.sender_address} />
+                <CopyButton text={txn.header.contract_address} />
               </Cell>
             </div>
 
@@ -350,7 +350,7 @@ export default async function TransactionPage(props: TransactionPageProps) {
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="flex items-center gap-2">
                       <Tooltip>
                         <TooltipTrigger>
                           <Link
@@ -358,25 +358,30 @@ export default async function TransactionPage(props: TransactionPageProps) {
                             className="flex items-center gap-1 font-mono text-[rgb(139,163,223)]"
                           >
                             {event.blockNumber}{" "}
-                            <CopyButton text={event.blockNumber} />
                           </Link>
                         </TooltipTrigger>
                         <TooltipContent>{event.blockNumber}</TooltipContent>
                       </Tooltip>
+                      <CopyButton text={event.blockNumber} />
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="flex items-center gap-2">
                       <Tooltip>
                         <TooltipTrigger>
                           <Link
                             href={`/contract/${event.fromAddress}`}
                             className="font-mono text-[rgb(139,163,223)]"
                           >
-                            {event.contractAlias}
+                            {event.contractAlias ||
+                              event.fromAddress.slice(0, 6) +
+                                "..." +
+                                event.fromAddress.slice(-4)}
                           </Link>
                         </TooltipTrigger>
                         <TooltipContent>{event.fromAddress}</TooltipContent>
                       </Tooltip>
+
+                      <CopyButton text={event.fromAddress} />
                     </TableCell>
 
                     <TableCell>
